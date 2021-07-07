@@ -1,1 +1,0 @@
-{% load i18n %}{% blocktrans with channel_name=channel.name %}CSV for {{ channel_name }}{% endblocktrans %}
