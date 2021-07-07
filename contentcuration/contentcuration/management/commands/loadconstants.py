@@ -1,9 +1,6 @@
-from future import standard_library
-
-standard_library.install_aliases()
-from builtins import str
-from builtins import object
 import logging as logmodule
+from builtins import object
+from builtins import str
 
 from django.conf import settings
 from django.contrib.sites.models import Site
