@@ -357,7 +357,9 @@ traitlets==4.3.3
 typed-ast==1.4.3
     # via astroid
 typing-extensions==3.10.0.0
-    # via asgiref
+    # via
+    #   -c requirements.txt
+    #   asgiref
 ujson==4.0.2
     # via
     #   python-jsonrpc-server
@@ -390,6 +392,8 @@ werkzeug==2.0.1
     #   locust
 wheel==0.36.2
     # via pypandoc
+whitenoise==5.2.0
+    # via -r requirements-dev.in
 wrapt==1.12.1
     # via astroid
 yapf==0.31.0
