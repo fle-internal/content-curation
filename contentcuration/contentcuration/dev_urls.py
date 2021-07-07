@@ -8,7 +8,6 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
-import contentcuration.views.files as file_views
 from .urls import urlpatterns
 
 
@@ -48,21 +47,6 @@ urlpatterns = urlpatterns + [
         r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
     ),
     re_path(r"^api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-    re_path(
-        r"^" + settings.STORAGE_URL[1:] + "(?P<path>.*)$",
-        file_views.debug_serve_file,
-        name="debug_serve_file",
-    ),
-    re_path(
-        r"^" + settings.CONTENT_DATABASE_URL[1:] + "(?P<path>.*)$",
-        file_views.debug_serve_content_database_file,
-        name="content_database_debug_serve_file",
-    ),
-    re_path(
-        r"^" + settings.CSV_URL[1:] + "(?P<path>.*)$",
-        file_views.debug_serve_file,
-        name="csv_debug_serve_file",
-    ),
 ]
 
 if getattr(settings, "DEBUG_PANEL_ACTIVE", False):
