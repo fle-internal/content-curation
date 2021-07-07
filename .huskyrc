@@ -1,6 +1,0 @@
-{
-  "hooks": {
-    "pre-commit": "yarn run lint:js:fix"
-  }
-}
-
