@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from contentcuration.models import Exercise, AssessmentItem, License, User
+from contentcuration.models import AssessmentItem
+from contentcuration.models import License
+from contentcuration.models import User
 
-admin.site.register(Exercise)
 admin.site.register(AssessmentItem)
 admin.site.register(License)
 

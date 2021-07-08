@@ -2133,11 +2133,6 @@ class RelatedContentRelationship(models.Model):
         super(RelatedContentRelationship, self).save(*args, **kwargs)
 
 
-class Exercise(models.Model):
-    contentnode = models.ForeignKey('ContentNode', related_name="exercise", null=True, on_delete=models.CASCADE)
-    mastery_model = models.CharField(max_length=200, default=exercises.DO_ALL, choices=exercises.MASTERY_MODELS)
-
-
 class Invitation(models.Model):
     """ Invitation to edit channel """
     id = UUIDField(primary_key=True, default=uuid.uuid4)
