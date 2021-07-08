@@ -7,7 +7,6 @@ from distutils.version import LooseVersion
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import SuspiciousOperation
-from django.core.management import call_command
 from django.db import transaction
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseForbidden
@@ -219,7 +218,7 @@ def api_commit_channel(request):
         event = generate_update_event(
             channel_id,
             CHANNEL,
-            {"root_id": obj.main_tree.id, "staging_root_id": obj.staging_tree.id,},
+            {"root_id": obj.main_tree.id, "staging_root_id": obj.staging_tree.id},
         )
 
         # Mark old staging tree for garbage collection
@@ -310,10 +309,17 @@ def api_publish_channel(request):
         channel_id = data["channel_id"]
         # Ensure that the user has permission to edit this channel.
         Channel.get_editable(request.user, channel_id)
-        call_command("exportchannel", channel_id, user_id=request.user.pk, version_notes=data.get('version_notes'))
+        task_args = {
+            "user_id": request.user.pk,
+            "channel_id": channel_id,
+            "version_notes": data.get('version_notes'),
+        }
+
+        _, task_info = create_async_task("export-channel", request.user, **task_args)
         return Response({
             "success": True,
-            "channel": channel_id
+            "channel": channel_id,
+            "task_id": task_info.task_id,
         })
     except (KeyError, Channel.DoesNotExist):
         return HttpResponseNotFound("No channel matching: {}".format(data))
@@ -441,7 +447,7 @@ def get_channel_status_bulk(request):
             raise PermissionDenied()
         statuses = {cid: get_status(cid) for cid in data['channel_ids']}
 
-        return Response({"success": True, "statuses": statuses,})
+        return Response({"success": True, "statuses": statuses})
     except (Channel.DoesNotExist, PermissionDenied):
         return HttpResponseNotFound(
             "No complete set of channels matching: {}".format(",".join(channel_ids))

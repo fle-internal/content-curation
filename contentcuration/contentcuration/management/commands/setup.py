@@ -24,6 +24,7 @@ from contentcuration.utils.db_tools import create_topic
 from contentcuration.utils.db_tools import create_user
 from contentcuration.utils.files import duplicate_file
 from contentcuration.utils.minio_utils import ensure_storage_bucket_public
+from contentcuration.utils.publish import publish_channel
 
 logmodule.basicConfig()
 logging = logmodule.getLogger(__name__)
@@ -132,7 +133,7 @@ class Command(BaseCommand):
         node.save()
 
         # Publish
-        call_command('exportchannel', channel1.pk)
+        publish_channel(admin.id, channel1.pk)
 
         # Add nodes to clipboard in legacy way
         legacy_clipboard_nodes = channel1.main_tree.get_children()
