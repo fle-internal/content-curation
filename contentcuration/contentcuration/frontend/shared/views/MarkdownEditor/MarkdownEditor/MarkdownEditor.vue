@@ -310,14 +310,12 @@
             return (
               el.previousSibling &&
               el.previousSibling.textContent &&
-              el.previousSibling.textContent.match(/\s$/)
+              /\s$/.test(el.previousSibling.textContent)
             );
           };
           const hasRightwardSpace = el => {
             return (
-              el.nextSibling &&
-              el.nextSibling.textContent &&
-              el.nextSibling.textContent.match(/^\s/)
+              el.nextSibling && el.nextSibling.textContent && /^\s/.test(el.nextSibling.textContent)
             );
           };
           if (!hasLeftwardSpace(el)) {
@@ -514,14 +512,14 @@
           isCustomNode(getElementAtRelativeOffset(selection, -2)) &&
           selection.startContainer.nodeType === document.TEXT_NODE &&
           getCharacterAtRelativeOffset(selection, -1) &&
-          !!getCharacterAtRelativeOffset(selection, -1).match(/^\s/);
+          /^\s/.test(getCharacterAtRelativeOffset(selection, -1));
 
         const spacerAndCustomElementAreRightward = selection =>
           selection &&
           isCustomNode(getElementAtRelativeOffset(selection, 2)) &&
           selection.startContainer.nodeType === document.TEXT_NODE &&
           getCharacterAtRelativeOffset(selection, 0) &&
-          !!getCharacterAtRelativeOffset(selection, 0).match(/\s$/);
+          /\s$/.test(getCharacterAtRelativeOffset(selection, 0));
 
         const moveCursor = (selection, amount) => {
           let { element, offset } = squire.getSelectionInfoByOffset(
