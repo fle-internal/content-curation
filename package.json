@@ -137,7 +137,7 @@
     "jest-each": "^24.8.0",
     "jest-environment-jsdom-sixteen": "^1.0.3",
     "jest-serializer-vue": "^2.0.2",
-    "kolibri-design-system": "git+https://github.com/learningequality/kolibri-design-system#v0.2.x",
+    "kolibri-design-system": "github:learningequality/kolibri-design-system#cfcfc2548584dcdf48426d9379fccb8f56dd6c54",
     "less": "^3.0.1",
     "less-loader": "^5.0.0",
     "mini-css-extract-plugin": "^0.4.0",
