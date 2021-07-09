@@ -20,7 +20,6 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.storage import FileSystemStorage
 from django.core.mail import send_mail
-from django.db import connection
 from django.db import IntegrityError
 from django.db import models
 from django.db.models import Count
@@ -35,8 +34,8 @@ from django.db.models import Subquery
 from django.db.models import Sum
 from django.db.models import UUIDField as DjangoUUIDField
 from django.db.models import Value
-from django.db.models.expressions import RawSQL
 from django.db.models.expressions import ExpressionList
+from django.db.models.expressions import RawSQL
 from django.db.models.functions import Cast
 from django.db.models.functions import Lower
 from django.db.models.indexes import IndexExpression
@@ -545,35 +544,6 @@ class FileOnDiskStorage(FileSystemStorage):
             logging.warn('Content copy "%s" already exists!' % name)
             return name
         return super(FileOnDiskStorage, self)._save(name, content)
-
-
-class ChannelResourceSize(models.Model):
-    tree_id = models.IntegerField()
-    resource_size = models.IntegerField()
-
-    pg_view_name = "contentcuration_channel_resource_sizes"
-    file_table = "contentcuration_file"
-    node_table = "contentcuration_contentnode"
-
-    @classmethod
-    def initialize_view(cls):
-        sql = 'CREATE MATERIALIZED VIEW {view} AS ' \
-              'SELECT tree_id as id, tree_id, SUM("{file_table}"."file_size") AS ' \
-              '"resource_size" FROM "{node}" LEFT OUTER JOIN "{file_table}" ON ' \
-              '("{node}"."id" = "{file_table}"."contentnode_id") GROUP BY {node}.tree_id' \
-              ' WITH DATA;'.format(view=cls.pg_view_name, file_table=cls.file_table, node=cls.node_table)
-        with connection.cursor() as cursor:
-            cursor.execute(sql)
-
-    @classmethod
-    def refresh_view(cls):
-        sql = "REFRESH MATERIALIZED VIEW {}".format(cls.pg_view_name)
-        with connection.cursor() as cursor:
-            cursor.execute(sql)
-
-    class Meta:
-        managed = False
-        db_table = "contentcuration_channel_resource_sizes"
 
 
 class SecretToken(models.Model):
@@ -2162,11 +2132,6 @@ class RelatedContentRelationship(models.Model):
                         .filter(contentnode_1=self.contentnode_2, contentnode_2=self.contentnode_1):
             return  # silently cancel the save
         super(RelatedContentRelationship, self).save(*args, **kwargs)
-
-
-class Exercise(models.Model):
-    contentnode = models.ForeignKey('ContentNode', related_name="exercise", null=True, on_delete=models.CASCADE)
-    mastery_model = models.CharField(max_length=200, default=exercises.DO_ALL, choices=exercises.MASTERY_MODELS)
 
 
 class Invitation(models.Model):

@@ -74,7 +74,6 @@ urlpatterns = [
     re_path(r'^healthz$', views.health, name='health'),
     re_path(r'^stealthz$', views.stealth, name='stealth'),
     re_path(r'^api/search/', include('search.urls'), name='search'),
-    re_path(r'^api/download_channel_content_csv/(?P<channel_id>[^/]{32})$', views.download_channel_content_csv, name='download_channel_content_csv'),
     re_path(r'^api/probers/get_prober_channel', views.get_prober_channel, name='get_prober_channel'),
     re_path(r'^api/sync/$', sync, name="sync"),
 ]
@@ -159,14 +158,13 @@ urlpatterns += i18n_patterns(
     # Redirect deprecated staging URL to new URL
     re_path(r'^channels/(?P<channel_id>[^/]{32})/staging/$', StagingPageRedirectView.as_view(), name='staging_redirect'),
     re_path(r'^channels/(?P<channel_id>[^/]{32})/$', views.channel, name='channel'),
-    re_path(r'^accessible_channels/(?P<channel_id>[^/]{32})$', views.accessible_channels, name='accessible_channels'),
     re_path(r'^accounts/login/$', registration_views.login, name='login'),
     re_path(r'^accounts/logout/$', registration_views.logout, name='logout'),
     re_path(r'^accounts/request_activation_link/$', registration_views.request_activation_link, name='request_activation_link'),
     re_path(r"^accounts/$", views.accounts, name="accounts"),
     re_path(r'^accounts/password/reset/$', registration_views.UserPasswordResetView.as_view(), name='auth_password_reset'),
     re_path(r'^accounts/password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        registration_views.UserPasswordResetConfirmView.as_view(), name='auth_password_reset_confirm'),
+            registration_views.UserPasswordResetConfirmView.as_view(), name='auth_password_reset_confirm'),
     re_path(r'^accounts/register/$', registration_views.UserRegistrationView.as_view(), name='register'),
     re_path(r'^activate/(?P<activation_key>[-:\w]+)/$', registration_views.UserActivationView.as_view(), name='registration_activate'),
     re_path(r'^api/send_invitation_email/$', registration_views.send_invitation_email, name='send_invitation_email'),

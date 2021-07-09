@@ -33,7 +33,6 @@ django-mathfilters
 google-cloud-kms==0.2.1
 backoff
 backports-abc==0.5
-whitenoise==4.1.4
 django-model-utils==4.0.0
 django-redis
 django-prometheus

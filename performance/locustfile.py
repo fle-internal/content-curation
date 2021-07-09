@@ -71,13 +71,6 @@ class ChannelListPage(BaseTaskSet):
     def on_start(self):
         self._login()
 
-    def channel_list_api_calls(self):
-        self.client.get("/get_user_pending_channels/")
-        self.client.get("/get_user_edit_channels/")
-        self.client.get("/get_user_bookmarked_channels/")
-        self.client.get("/get_user_public_channels/")
-        self.client.get("/get_user_view_channels/")
-
     @task
     def channel_list(self):
         """
@@ -98,7 +91,7 @@ class ChannelPage(BaseTaskSet):
         Returns the id of the first available public channel
         :returns: id of the first available public channel or None if there are not public channels
         """
-        resp = self.client.get("/get_user_public_channels/").json()
+        resp = self.client.get("/api/channels?public=true").json()
         try:
             channel_id = resp[0]['id']
         except IndexError:
@@ -110,7 +103,7 @@ class ChannelPage(BaseTaskSet):
         Returns the id of the first available public channel
         :returns: id of the first available public channel or None if there are not public channels
         """
-        resp = self.client.get("/get_user_edit_channels/").json()
+        resp = self.client.get("/api/channels?edit=true").json()
         try:
             channel_id = resp[0]['id']
         except IndexError:
@@ -136,11 +129,11 @@ class ChannelPage(BaseTaskSet):
         :param: topic_id: id of the topic where the resource must be found
         :returns: id of the selected resource
         """
-        nodes_resp = self.client.get('/api/get_nodes_by_ids/{}'.format(topic_id)).json()
+        nodes_resp = self.client.get('/api/contentnodes?parent={}'.format(topic_id)).json()
         try:
             while nodes_resp[0]['kind'] == 'topic':
                 nodes = nodes_resp[0]['children']
-                nodes_resp = self.client.get('/api/get_nodes_by_ids/{}'.format(','.join(nodes))).json()
+                nodes_resp = self.client.get('/api/contentnodes?ids={}'.format(','.join(nodes))).json()
             node_id = nodes_resp[0]['id']
             if random:
                 node_id = choice(nodes_resp)['id']
@@ -157,18 +150,6 @@ class ChannelPage(BaseTaskSet):
             channel_id = self.get_first_public_channel_id()
         if channel_id:
             self.client.get('/channels/{}'.format(channel_id))
-
-    # This is hit hard during heavy usage, and is one of our slowest calls,
-    # so give it some extra weight.
-    @task(3)
-    def open_accessible_channels(self, channel_id=None):
-        """
-        Open to edit a channel, if channel_id is None it opens the first public channel
-        """
-        if not channel_id:
-            channel_id = self.get_first_edit_channel_id()
-        if channel_id:
-            self.client.get('/accessible_channels/{}'.format(channel_id))
 
     # This is the most frequently hit scenario outside of ricecooker usage, so give it more weight.
     @task(3)
@@ -194,7 +175,7 @@ class ChannelPage(BaseTaskSet):
             topic_id = self.get_topic_id(channel_id, random=random)
             content_id = self.get_resource_id(topic_id, random=random)
             if content_id:
-                resp = self.client.get('/api/get_nodes_by_ids_complete/{}'.format(content_id)).json()
+                resp = self.client.get('/api/contentnode/{}'.format(content_id)).json()
                 if 'files' in resp[0]:
                     for resource in resp[0]['files']:
                         storage_url = resource['storage_url']
@@ -228,7 +209,7 @@ class ChannelEdit(BaseTaskSet):
             # TODO: check for deletion issues and report so that manual cleanup can be performed if needed.
 
     @task(6)
-    def create_channel_and_copy_content(self):
+    def create_channel(self):
         """
         Load the channel page and the important endpoints.
         """
@@ -244,7 +225,7 @@ class ChannelEdit(BaseTaskSet):
             "content_defaults": {},
             "pending_editors": []
         }
-        resp = self.client.post(
+        self.client.post(
             "/api/channel",
             data=json.dumps(formdata),
             headers={
@@ -253,30 +234,6 @@ class ChannelEdit(BaseTaskSet):
                 'Referer': self.client.base_url
             }
         )
-
-        data = resp.json()
-        channel_id = data["id"]
-
-        try:
-            copy_data = {
-                # KA Computing root node.
-                "node_ids": ["76d5fd8636004b459a09aecbb2f8294e"],
-                "sort_order": 1,
-                "target_parent": data["main_tree"]["id"],
-                "channel_id": channel_id
-            }
-
-            self._run_async_task('/api/duplicate_nodes/', channel_id, copy_data)
-
-        finally:
-            self.client.delete(
-                "/api/channel/{}".format(channel_id),
-                headers={
-                    "content-type": "application/json",
-                    'X-CSRFToken': self.client.cookies.get('csrftoken'),
-                    'Referer': self.client.base_url
-                }
-            )
 
 
 class LoginPage(BaseTaskSet):

@@ -290,8 +290,6 @@ vine==1.3.0
     #   celery
 webencodings==0.5.1
     # via html5lib
-whitenoise==4.1.4
-    # via -r requirements.in
 zipp==3.4.1
     # via importlib-metadata
 

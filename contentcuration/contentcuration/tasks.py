@@ -20,7 +20,6 @@ from contentcuration.models import Channel
 from contentcuration.models import ContentNode
 from contentcuration.models import Task
 from contentcuration.models import User
-from contentcuration.utils.csv_writer import write_channel_csv_file
 from contentcuration.utils.csv_writer import write_user_csv
 from contentcuration.utils.nodes import calculate_resource_size
 from contentcuration.utils.nodes import generate_diff
@@ -190,21 +189,6 @@ def sync_channel_task(
         sync_tags,
         progress_tracker=self.progress,
     )
-
-
-@app.task(name="generatechannelcsv_task")
-def generatechannelcsv_task(channel_id, domain, user_id):
-    channel = Channel.objects.get(pk=channel_id)
-    user = User.objects.get(pk=user_id)
-    csv_path = write_channel_csv_file(channel, site=domain)
-    subject = render_to_string("export/csv_email_subject.txt", {"channel": channel})
-    message = render_to_string(
-        "export/csv_email.txt", {"channel": channel, "user": user}
-    )
-
-    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
-    email.attach_file(csv_path)
-    email.send()
 
 
 class CustomEmailMessage(EmailMessage):
