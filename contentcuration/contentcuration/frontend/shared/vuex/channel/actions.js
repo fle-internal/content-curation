@@ -248,7 +248,7 @@ export async function sendInvitation(context, { channelId, email, shareMode }) {
   await Invitation.transaction({ mode: 'rw', source: IGNORED_SOURCE }, () => {
     return Invitation.table.put(postedInvitation.data);
   });
-  return await context.commit('ADD_INVITATION', postedInvitation.data);
+  context.commit('ADD_INVITATION', postedInvitation.data);
 }
 
 export function deleteInvitation(context, invitationId) {
